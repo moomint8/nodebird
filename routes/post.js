@@ -8,6 +8,9 @@ const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
+const AWS = require('aws-sdk');
+const multerS3 = require('multer-s3');
+
 try {
     fs.readdirSync('uploads');
 } catch (error) {
@@ -15,22 +18,25 @@ try {
     fs.mkdirSync('uploads');
 }
 
+AWS.config.update({
+    accessKeyId: process.env.S3_ACCESS_KEY_ID,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    region: 'ap-northeast-2',
+});
+
 const upload = multer({
-    storage: multer.diskStorage({
-        destination(req, file, cb) {
-            cb(null, 'uploads/');
-        },
-        filename(req, file, cb) {
-            const ext = path.extname(file.originalname);
-            cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
+    storage: multerS3({
+        s3: new AWS.S3(),
+        bucket: 'nodebirdmoomint',
+        key(req, file, cb) {
+            cb(null, `original/${Date.now()}${path.basename(file.originalname)}`);
         },
     }),
     limits: { fileSize: 5 * 1024 * 1024 },
 });
-
 router.post('/img', isLoggedIn, upload.single('img'), (req, res) => {
     console.log(req.file);
-    res.json({ url: `/img/${req.file.filename}` });
+    res.json({ url: req.file.location });
 });
 
 const upload2 = multer();
