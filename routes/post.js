@@ -18,7 +18,7 @@ try {
 
 const upload = multer({
     storage: multerGoogleStorage.storageEngine({
-        bucket: 'nodebird',
+        bucket: 'nodebirdmoomint',
         projectId: 'node-deploy-270114',
         keyFilename: 'node-deploy-270114-b024dbed754a.json',
         filename(req, file, cb) {
