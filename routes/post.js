@@ -25,7 +25,7 @@ AWS.config.update({
 const upload = multer({
     storage: multerS3({
         s3: new AWS.S3(),
-        bucket: 'nodebird',
+        bucket: 'nodebirdmoomint',
         key(req, file, cb) {
             cb(null, `original/${Date.now()}${path.basename(file.originalname)}`);
         },
@@ -33,7 +33,9 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 },
 });
 router.post('/img', isLoggedIn, upload.single('img'), (req, res) => {
-    console.log(req.file);
+    const filePath = req.file.path.split('/').splice(0, 3).join('/');
+    const originalUrl = `${filePath}/${req.file.filename}`;
+    const url = originalUrl.replace(/\/original\//, '/thumb/');
     res.json({ url: req.file.location });
 });
 
